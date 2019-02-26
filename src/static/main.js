@@ -16,6 +16,7 @@ function rq_item(item, callback){
 function load(){
     id('javascriptremoveme').innerHTML = '';
     id('homebutton').onclick = r => {changeto('index'); return false;};
+    id('aboutbutton').onclick = r => {changeto('about'); return false;};
     rq_item(new URL(window.location).searchParams.get('ii') || 'index', r => replace_front(r));
 }
 
@@ -25,13 +26,21 @@ function changeto(item){
 
 function fix_links(e){
     let els = e.querySelectorAll('a');
-    for(let i=els.length; i--; ) {
+    for (let i=els.length; i--; ) {
         let url = new URL(els[i].href);
         if (url.search.startsWith('?ii=')){
             els[i].onclick = (r => {changeto(new URL(r.target.href).searchParams.get('ii')); return false;});
+            els[i].onmouseover = function(){
+                var area=this;
+                var delay=setTimeout(function(){showHideDivs(area.indx);},100);
+                area.onmouseout=function(){clearTimeout(delay);};
+            };
+            els[i].style.textDecorationColor = '#5af';
         }
     }
 }
+
+
 
 window.onpopstate = function(event) {
     replace_front(items[event.state], true);
@@ -55,6 +64,8 @@ function replace_front(item, preserveHistory){
         MathJax.Hub.Queue(["Typeset",MathJax.Hub,div]);
         itemstack.push(div);
         item._div = div;
+        item._sidedivs = [];
+        //load_sidedivs(item);
     }
     else{
         itemstack.splice(itemstack.indexOf(items[item.name]._div), 1);
@@ -67,10 +78,11 @@ function replace_front(item, preserveHistory){
 
 function recompute_stack_positions(){
     let vw = window.innerWidth, vh = window.innerHeight;
+    let topMargin = 32;
     let heightLeft = vh - 10;
     for (let i=itemstack.length-1; i>=0; i--){
         let item = itemstack[i];
-        item.targetTop = vh - heightLeft
+        item.targetTop = vh - heightLeft + topMargin;
         item.targetLeft = vw/2 - item.offsetWidth/2;
         item.departTop = item.offsetTop;
         item.departLeft = item.offsetLeft;

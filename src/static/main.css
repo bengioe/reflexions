@@ -24,8 +24,9 @@ a:visited {
 }
 
 #homebutton{
-    position: absolute;
-    top: 0px;
-    left: 0px;
+    color: #888;
+}
+
+#aboutbutton{
     color: #888;
 }
