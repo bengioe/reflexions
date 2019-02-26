@@ -1,0 +1,31 @@
+
+.front_item {
+    position: absolute;
+    border: 1px solid #555;
+    border-radius: 5px;
+    min-width: 400px;
+    max-width: 400px;
+    top: 0px;
+    left: 0px;
+    padding: 5px;
+}
+
+body {
+    font-family: Arial, sans-serif;
+    font-size: 15px;
+}
+
+a {
+    color: #005;
+}
+
+a:visited {
+    color: #008;
+}
+
+#homebutton{
+    position: absolute;
+    top: 0px;
+    left: 0px;
+    color: #888;
+}
