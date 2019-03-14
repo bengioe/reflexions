@@ -8,7 +8,7 @@ function rq_item(item, callback){
     if (items.hasOwnProperty(item)){
         callback(items[item]);
     }else{
-        fetch("items/"+item).then(r => r.json()).then(r => {items[r.name] = r; callback(r)});
+        fetch("items/"+item, {cache: "no-cache"}).then(r => r.json()).then(r => {items[r.name] = r; callback(r)});
     }
 }
 
@@ -24,18 +24,28 @@ function changeto(item){
     rq_item(item, r => replace_front(r));
 }
 
-function fix_links(e){
-    let els = e.querySelectorAll('a');
+function fix_links(div, item){
+    let els = div.querySelectorAll('a');
     for (let i=els.length; i--; ) {
         let url = new URL(els[i].href);
         if (url.search.startsWith('?ii=')){
             els[i].onclick = (r => {changeto(new URL(r.target.href).searchParams.get('ii')); return false;});
-            els[i].onmouseover = function(){
-                var area=this;
-                var delay=setTimeout(function(){showHideDivs(area.indx);},100);
-                area.onmouseout=function(){clearTimeout(delay);};
-            };
             els[i].style.textDecorationColor = '#5af';
+        }
+        if (url.search.startsWith('?as=')){
+            let show = function(){
+                console.log('aside:'+url.searchParams.get('as'), item['aside:'+url.searchParams.get('as')])
+                item._sidediv.innerHTML = item['aside:'+url.searchParams.get('as')];
+                item._sidediv.style.top = els[i].offsetTop+'px';
+                item._sidediv.style.visibility = 'visible';
+                MathJax.Hub.Queue(["Typeset",MathJax.Hub,item._sidediv]);
+                //var delay=setTimeout(function(){showHideDivs(area.indx);},100);
+                //area.onmouseout=function(){clearTimeout(delay);};
+                return false;
+            };
+            els[i].onclick = show;
+            els[i].onmouseover = show;
+            els[i].style.textDecorationColor = '#fa1';
         }
     }
 }
@@ -43,7 +53,8 @@ function fix_links(e){
 
 
 window.onpopstate = function(event) {
-    replace_front(items[event.state], true);
+    rq_item(event.state, r => replace_front(r, true));
+    //replace_front(items[event.state], true);
 };
 
 var itemdivs = [];
@@ -60,11 +71,16 @@ function replace_front(item, preserveHistory){
         div.style.top = "0px";
         div.style.left = window.innerWidth / 2 - div.offsetWidth / 2 + 'px';
         div.innerHTML = item.body;
-        fix_links(div);
-        MathJax.Hub.Queue(["Typeset",MathJax.Hub,div]);
+        fix_links(div, item);
         itemstack.push(div);
         item._div = div;
-        item._sidedivs = [];
+        item._sidediv = document.createElement('div');
+        item._sidediv.classList.add('front_item');
+        item._sidediv.style.top = "0px";
+        item._sidediv.style.left = (4 + div.offsetWidth) + "px";
+        item._sidediv.style.visibility = 'hidden';
+        div.appendChild(item._sidediv);
+        MathJax.Hub.Queue(["Typeset",MathJax.Hub,div]);
         //load_sidedivs(item);
     }
     else{

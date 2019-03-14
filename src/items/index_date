@@ -1,0 +1,6 @@
+#date 2019-03-05T12:31:37
+#title Index-by-date
+#eval_python
+
+{insert_recent(None, date=True)}
+
